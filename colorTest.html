@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html lang='en'>
+<head>
+  <meta charset="utf-8">
+  <title>
+    color test
+  </title>
+  <script src = "https://d3js.org/d3.v5.min.js" charset="utf-8"></script>
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script src="https://d3js.org/topojson.v2.min.js"></script>
+
+  <style>
+
+  </style>
+
+</head>
+
+<body>
+  <script>
+    var color = d3.scaleQuantize()
+    .domain([1,10])
+    .range(d3.schemePurples[9]);
+
+    // create svg element
+    var svg = d3.select("body")
+    .append("svg")
+    .attr("width", 1000)
+    .attr("height",400);
+
+    // Create data
+    var data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+    // Option 1: give 2 color names
+    // var myColor = d3.scaleLinear()
+    //   .domain([1,10])
+    //   .range(["white", "blue"])
+
+    svg.selectAll("circle")
+    .data(data)
+    .enter()
+    .append("circle")
+    .attr("cx", function(d,i){return 30 + i*60})
+    .attr("cy", 50)
+    .attr("r", 19)
+    .attr("fill", function(d){
+      return color(d)
+    })
+
+
+  </script>
+</body>
+</html>

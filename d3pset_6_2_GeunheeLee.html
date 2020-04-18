@@ -13,6 +13,10 @@
   <script src="https://d3js.org/topojson.v2.min.js"></script>
 
   <style>
+  .boundary {
+  stroke: #333;
+  stroke-linejoin: round;
+  }
   </style>
 
 </head>
@@ -44,17 +48,48 @@
               .rangeRound([600, 860]);
 
     var color = d3.scaleQuantize()
-                  .domain(d3.range(0, 5.6))
+                  // .domain(d3.range(0, 5.6))
+                  .domain([0,5.6])
                   .range(d3.schemePurples[9]);
 
     var g = svg.append("g")
                .attr("class", "key")
                .attr("transform", "translate(0,40)");
 
-
-
     var boston = d3.map();
 
+//legend
+    g.selectAll("rect")
+        .data(color.range().map(function(d) {
+            d = color.invertExtent(d);
+            if (d[0] == null) d[0] = x.domain()[0];
+            if (d[1] == null) d[1] = x.domain()[1];
+            return d;
+        }))
+        .enter().append("rect")
+        .attr("height", 8)
+        .attr("x", function(d) { return x(d[0]); })
+        .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+        .attr("fill", function(d) { return color(d[0]); });
+
+    g.append("text")
+        .attr("class", "caption")
+        .attr("x", x.range()[0])
+        .attr("y", -6)
+        .attr("fill", "#000")
+        .attr("text-anchor", "start")
+        .attr("font-weight", "bold")
+        .text("Tweets per neighborhoods(log scale)");
+
+    g.call(d3.axisBottom(x)
+    .tickSize(13)
+    .tickFormat(function(x, i) { return i ? x : x; })
+    .tickValues(color.domain()))
+    .select(".domain")
+    .remove();
+
+
+//map
     var promises = [
                     d3.json(bostonurl),
                     d3.csv(boston311url, function(d) { boston.set(d.Name, +d.twitter); })
@@ -71,45 +106,25 @@
         .enter()
         .append("path")
         .attr("fill", function(d) {
-          console.log(Object.values(boston))
-
-          console.log("d: ",boston.get(d.properties.Name))
-
-           return color(d.twitter = boston.get(d.properties.Name)); }) //Math.log()
+          // console.log(Object.values(boston))
+          // console.log("d: ",boston.get(d.properties.Name))
+          // console.log(Math.log(d.twitter = boston.get(d.properties.Name)))
+           return color(Math.log(d.twitter = boston.get(d.properties.Name)));
+         })
         .attr("d", geoPath)
+        .attr("class", "boundary")
         .append("title")
-        .text(function(d) { return d.twitter + "%"; });
-
+        .text(function(d) {
+          return d.properties.Name + ": "
+          + Math.log(d.twitter); });
     }
 
 
-    // g.selectAll("rect")
-    // .data(color.range().map(function(d) {
-    //   d = color.invertExtent(d);
-    //   if (d[0] == null) d[0] = x.domain()[0];
-    //   if (d[1] == null) d[1] = x.domain()[1];
-    //   return d;
-    // }))
-    // .enter().append("rect")
-    // .attr("height", 8)
-    // .attr("x", function(d) { return x(d[0]); })
-    // .attr("width", function(d) { return x(d[1]) - x(d[0]); })
-    // .attr("fill", function(d) { return color(d[0]); });
-    //
-    // g.append("text")
-    // .attr("class", "caption")
-    // .attr("x", x.range()[0])
-    // .attr("y", -6)
-    // .attr("fill", "#000")
-    // .attr("text-anchor", "start")
-    // .attr("font-weight", "bold")
-    // .text("legend");
-    //
-    // g.call(d3.axisBottom(x)
-    // .tickSize(13)
-    // .tickFormat(function(x, i) { return i ? x : x + "%"; })
-    // .tickValues(color.domain()))
-    // .select(".domain")
-    // .remove();
+//tooltip
+
+
+
 
     </script>
+  </body>
+</html>
