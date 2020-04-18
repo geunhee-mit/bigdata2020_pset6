@@ -79,23 +79,23 @@
 							 })
 
 
-			//
-			// svg.selectAll("text")
-			// 	    .data(agriculturedata)
-			// 	    .enter()
-			// 	    .append("text")
-			// 			.text(function(d,i) {
-			// 		        return d[0];
-			// 					})
-			// 			.attr("class", "text-styling")
-			// 			.attr("text-anchor", "end")
-			// 			.attr("y", function(d, i) {
-			// 							return i*40 + 100;
-			// 				 })
-			// 			.attr("x", 150)
-			// 			.attr("width", function(d) {
-			// 							return d[1]*4;
-			// 				 })
+
+			svg.selectAll("text")
+				    .data(agriculturedata)
+				    .enter()
+				    .append("text")
+						.text(function(d,i) {
+					        return d[0];
+								})
+						.attr("class", "text-styling")
+						.attr("text-anchor", "end")
+						.attr("y", function(d, i) {
+										return i*40 + 100;
+							 })
+						.attr("x", 150)
+						.attr("width", function(d) {
+										return d[1]*4;
+							 })
 
 ///
 // svg.append("text")
