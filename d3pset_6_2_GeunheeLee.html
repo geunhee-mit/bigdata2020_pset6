@@ -108,6 +108,8 @@
         .append("title")
         // .attr("class", "tooltip")
         .style("fill", "white")
+        .style("padding", 5)
+        .style("opacity", 0.6)
         .text(function(d) {
           return d.properties.Name + ": "
           + (d.twitter/d.tot_count)*100 + "%"
