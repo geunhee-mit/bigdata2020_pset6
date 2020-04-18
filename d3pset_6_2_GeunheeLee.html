@@ -26,78 +26,146 @@
   You can apply a logarithm transformation for the value with this function:
   Math.log() -->
   <style>
+  .counties {
+    fill: none;
+  }
+
+  .states {
+    fill: none;
+    stroke: #fff;
+    stroke-linejoin: round;
+  }
   </style>
 </head>
 
 <body>
   <script>
-    var bostonurl = 'https://gist.githubusercontent.com/cesandoval/09b2e39263c748fbcb84b927cecc7c46/raw/ab71d3638efd2545ec99c2651c6f2ddcea9d2a07/boston.json';
+  // var uscountyurl='https://unpkg.com/us-atlas@1/us/10m.json'
+  // var unemploymenturl ="https://gist.githubusercontent.com/jdev42092/9a314291805640a097e16e58248627eb/raw/365c199c5a173a0018608615b6823b5cdcaa6bae/unemployment.tsv"
 
-    var boston311url = 'https://raw.githubusercontent.com/brookefzy/BigData2020/master/pset6/boston_311.csv'
+  var bostonurl = 'https://gist.githubusercontent.com/cesandoval/09b2e39263c748fbcb84b927cecc7c46/raw/ab71d3638efd2545ec99c2651c6f2ddcea9d2a07/boston.json'
+  var boston311url = 'https://raw.githubusercontent.com/brookefzy/BigData2020/master/pset6/boston_311.csv'
 
-    var bosNeighborurl="https://gist.githubusercontent.com/jdev42092/5c285c4a3608eb9f9864f5da27db4e49/raw/a1c33b1432ca2948f14f656cc14c7c7335f78d95/boston_neighborhoods.json"
+  // var bosNeighborurl="https://gist.githubusercontent.com/jdev42092/5c285c4a3608eb9f9864f5da27db4e49/raw/a1c33b1432ca2948f14f656cc14c7c7335f78d95/boston_neighborhoods.json"
 
-    var width = 1000,
-        height = 1000;
+  var width = 1000,
+  height = 600;
 
-    var path = d3.geoPath()
-    // var geoPath = d3.geoPath()
-    // .projection(albersProjection)
+  // var path = d3.geoPath()
+  var geoPath = d3.geoPath()
+                  .projection(albersProjection)
 
-    var svg = d3.select("body")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height)
+  var svg = d3.select("body")
+  .append("svg")
+  .attr("width", width)
+  .attr("height", height);
 
-    var g = svg.append("g")
+  var x = d3.scaleLinear()
+  .domain([1, 10])
+  .rangeRound([600, 860]);
 
-    var albersProjection = d3.geoAlbers()
-    .scale( 190000)
-    .rotate([71.057,0])
-    .center([0,42.313])
-    .translate([width/2, height/2])
+  var color = d3.scaleQuantize()
+  .domain(d3.range(2, 10))
+  .range(d3.schemePurples[9]);
 
-    var unemployment = d3.map();
-    var boston = d3.map();
+  // var g = svg.append("g")
+  var g = svg.append("g")
+            .attr("class", "key")
+            .attr("transform", "translate(0,40)");
 
-    var x = d3.scaleLinear()
-        .domain([1, 10])
-        .rangeRound([600, 860]);
+  var albersProjection = d3.geoAlbers()
+  .scale( 190000)
+  .rotate([71.057,0])
+  .center([0,42.313])
+  .translate([width/2, height/2])
 
-    var color = d3.scaleThreshold()
-        .domain(d3.range(2, 10))
-        .range(d3.schemeBlues[9]);
+  // var unemployment = d3.map();
 
-    // d3.json(bostonurl).then(function(bosMap){
-    //  console.log(bosMap)
-    //        g.selectAll("path")
-    //         .data(bosMap.features)
-    //         .enter()
-    //         .append("path")
-    //         .attr("fill","#ccc")
-    //         .attr("stroke","#333")
-    //         .attr("d",geoPath)
+  var boston = d3.map();
+
+
+
+
+
+  g.selectAll("rect")
+  .data(color.range().map(function(d) {
+    d = color.invertExtent(d);
+    if (d[0] == null) d[0] = x.domain()[0];
+    if (d[1] == null) d[1] = x.domain()[1];
+    return d;
+  }))
+  .enter().append("rect")
+  .attr("height", 8)
+  .attr("x", function(d) { return x(d[0]); })
+  .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+  .attr("fill", function(d) { return color(d[0]); });
+
+  g.append("text")
+  .attr("class", "caption")
+  .attr("x", x.range()[0])
+  .attr("y", -6)
+  .attr("fill", "#000")
+  .attr("text-anchor", "start")
+  .attr("font-weight", "bold")
+  .text("Unemployment rate");
+
+  g.call(d3.axisBottom(x)
+  .tickSize(13)
+  .tickFormat(function(x, i) { return i ? x : x + "%"; })
+  .tickValues(color.domain()))
+  .select(".domain")
+  .remove();
+
+  // var promises = [
+  //   // d3.json(uscountyurl),
+  //   // d3.tsv(unemploymenturl,
+  //   d3.json(bostonurl),
+  //   d3.csv(boston311url,
+  //     function(d) { unemployment.set(d.id, +d.rate); })
+  //   ]
+
+    // Promise.all(promises).then(ready)
+
+    d3.json(bostonurl).then(function(bosMap){
+     console.log(bosMap)
+           g.selectAll("path")
+            .data(bosMap[0])
+            .enter()
+            .append("path")
+            .attr("fill","#ccc")
+            .attr("stroke","#333")
+            .attr("d",geoPath)
+    })
+
+    //     d3.json(bosNeighborurl).then(function(bosNeighbor){
+    //       console.log(bosNeighbor)
+    //       g.selectAll("path")
+    //       .data(bosNeighbor.features)
+    //       .enter()
+    //       .append("path")
+    //       .attr("fill","#ccc")
+    //       .attr("stroke","#333")
+    //       .attr("d",geoPath)
     // })
 
-
-    d3.json(bosNeighborurl).then(function(bosNeighbor){
-      console.log(bosNeighbor)
-      g.selectAll("path")
-      .data(bosNeighbor.features)
-      .enter()
-      .append("path")
-      .attr("fill","#ccc")
-      .attr("stroke","#333")
-      .attr("d",geoPath)
-})
-
-
-    // var quantize = d3.scaleQuantize() //https://github.com/d3/d3-scale/blob/master/README.md#quantize-scales
-    //     .domain(d3.extent(bosNeighbor)) // pass only the extreme values to a scaleQuantize’s domain
-    //     .range(["#fcfbfd","#fcfbfd","#fbfafc","#fbfafc","#faf9fc","#faf9fc","#faf8fb","#f9f8fb","#f9f7fb","#f8f7fb","#f8f7fa","#f7f6fa","#f7f6fa","#f7f5fa","#f6f5f9","#f6f4f9","#f5f4f9","#f5f3f9","#f4f3f8","#f4f2f8","#f4f2f8","#f3f2f8","#f3f1f7","#f2f1f7","#f2f0f7","#f1f0f7","#f1eff6","#f0eff6","#f0eef6","#efeef5","#efedf5","#eeedf5","#eeecf5","#edecf4","#edebf4","#ecebf4","#ebeaf3","#ebe9f3","#eae9f3","#eae8f3","#e9e8f2","#e8e7f2","#e8e7f2","#e7e6f1","#e7e5f1","#e6e5f1","#e5e4f0","#e5e4f0","#e4e3f0","#e3e2ef","#e3e2ef","#e2e1ef","#e1e1ee","#e1e0ee","#e0dfee","#dfdfed","#dedeed","#dedded","#ddddec","#dcdcec","#dbdbec","#dbdaeb","#dadaeb","#d9d9ea","#d8d8ea","#d7d7ea","#d7d7e9","#d6d6e9","#d5d5e8","#d4d4e8","#d3d3e8","#d2d3e7","#d2d2e7","#d1d1e6","#d0d0e6","#cfcfe5","#cecee5","#cdcee5","#cccde4","#cbcce4","#cbcbe3","#cacae3","#c9c9e2","#c8c8e2","#c7c7e1","#c6c6e1","#c5c5e0","#c4c4e0","#c3c3df","#c2c3df","#c1c2de","#c0c1de","#bfc0dd","#bebfdd","#bebedc","#bdbddc","#bcbcdb","#bbbbda","#babada","#b9b9d9","#b8b8d9","#b7b7d8","#b6b5d8","#b5b4d7","#b4b3d6","#b3b2d6","#b2b1d5","#b1b0d5","#b0afd4","#afaed4","#aeadd3","#aeacd2","#adabd2","#acaad1","#aba9d1","#aaa8d0","#a9a7cf","#a8a6cf","#a7a5ce","#a6a4ce","#a5a3cd","#a4a2cd","#a3a1cc","#a2a0cb","#a19fcb","#a09eca","#9f9dca","#9e9cc9","#9e9ac9","#9d9ac8","#9c99c8","#9b98c7","#9a97c7","#9996c6","#9895c6","#9794c5","#9693c5","#9592c4","#9491c4","#9390c3","#928fc3","#918ec2","#908dc2","#908cc1","#8f8bc1","#8e8ac0","#8d89c0","#8c88bf","#8b87bf","#8a86be","#8985be","#8884bd","#8883bd","#8782bc","#8680bc","#857fbb","#847eba","#837dba","#827cb9","#827bb9","#817ab8","#8079b8","#7f77b7","#7e76b6","#7e75b6","#7d74b5","#7c73b4","#7b71b4","#7b70b3","#7a6fb3","#796eb2","#786cb1","#786bb1","#776ab0","#7668af","#7567af","#7566ae","#7465ad","#7363ad","#7362ac","#7261ab","#715fab","#705eaa","#705ca9","#6f5ba8","#6e5aa8","#6e58a7","#6d57a6","#6c56a6","#6c54a5","#6b53a4","#6a52a4","#6950a3","#694fa2","#684ea2","#674ca1","#674ba0","#664aa0","#65489f","#65479e","#64469e","#63449d","#63439c","#62429c","#61409b","#613f9a","#603e9a","#5f3c99","#5e3b99","#5e3a98","#5d3897","#5c3797","#5c3696","#5b3595","#5a3395","#5a3294","#593194","#582f93","#582e92","#572d92","#562b91","#562a91","#552990","#54288f","#54268f","#53258e","#52248e","#52238d","#51218c","#50208c","#501f8b","#4f1e8b","#4e1c8a","#4e1b8a","#4d1a89","#4c1988","#4c1788","#4b1687","#4a1587","#4a1486","#491286","#481185","#481084","#470f84","#460d83","#460c83","#450b82","#440a82","#440981","#430780","#420680","#42057f","#41047f","#40027e","#40017e","#3f007d"])
-    // //     //https://observablehq.com/@d3/color-schemes?collection=@d3/d3-scale-chromatic
-    // //     //https://github.com/d3/d3-scale-chromatic
-
+    // function ready([us]) {
+    //   console.log(us)
+    //   console.log(unemployment)
+    //   svg.append("g")
+    //   .attr("class", "counties")
+    //   .selectAll("path")
+    //   .data(topojson.feature(us, us.objects.counties).features)
+    //   .enter().append("path")
+    //   .attr("fill", function(d) { return color(d.rate = unemployment.get(d.id)); })
+    //   .attr("d", path)
+    //   .append("title")
+    //   .text(function(d) { return d.rate + "%"; });
+    //
+    //   svg.append("path")
+    //   .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+    //   .attr("class", "states")
+    //   .attr("d", path);
+    // }
 
     // Task 6.2.2: Add a tooltip
     // Now we'll want to add some user interaction. We will add the specific percentage of Twitter reporting associated with a given neighborhood. Let's add a tooltip that will display the name of the neighborhood and its percentage when a user mouses over its geometry!
@@ -112,6 +180,6 @@
     // We will add a legend to allow the user to reference the shading of the neighborhoods. Create a legend in D3, in a similar way of other D3 graphics. You will be drawing rectangles that will be shaded like the geometries and an axis that displays the range to which each rectangle corresponds. Hints: this example can be a useful reference. To make the legend visible you might have to experiment with the legend's width, and your map's height. Also make sure that your variables are scoped correctly.
 
 
-  </script>
-</body>
-</html>
+    </script>
+  </body>
+  </html>
