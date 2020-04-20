@@ -29,6 +29,17 @@
   opacity:0.6;
 } */
 
+
+  #tooltip {
+   position: absolute;
+   width: 100px;
+   height: 65px;
+   padding: 5px;
+   background-color: white;
+   border: solid gray 1px;
+   z-index:10;
+  }
+
   </style>
 
 </head>
@@ -86,6 +97,20 @@
 
     Promise.all(promises).then(ready)
 
+//
+var tooltip = d3.select("body")
+      .append("div")
+      .style("position", "absolute")
+      .style("z-index", "10")
+      .style("visibility", "hidden")
+      .style("background","white")
+      .style("opacity","0.6")
+      .style("padding","5px")
+      .style("font-family", "'Open Sans', sans-serif")
+      .style("font-size", "12px");
+//
+
+
     function ready([bosMap]) {
     // console.log(bosMap)
     // console.log(Object.values(boston))
@@ -105,6 +130,8 @@
         .attr("d", geoPath)
         .attr("class", "boundary")
 
+
+
         .append("title")
         // .attr("class", "tooltip")
         .style("fill", "white")
@@ -114,7 +141,9 @@
           return d.properties.Name + ": "
           + (d.twitter/d.tot_count)*100 + "%"
         });
-    }
+}
+
+
 
 
 
